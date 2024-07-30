@@ -18,4 +18,5 @@ install_yoctopuce <- function(..., envname = "r-yoctopuce") {
 
 .onLoad <- function(...) {
   reticulate::use_virtualenv("r-yoctopuce", required = FALSE)
+  assign("registered_hubs", character(), inherits = TRUE)
 }

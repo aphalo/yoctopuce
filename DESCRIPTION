@@ -18,7 +18,7 @@ Depends:
 Suggests:
     knitr (>= 1.24),
     rmarkdown (>= 1.14)
-URL: https://www.r4photobiology.info, https://github.com/aphalo/yoctopuce
+URL: https://github.com/aphalo/yoctopuce, https://docs.r4photobiology.info/yoctopuce
 BugReports: https://github.com/aphalo/yoctopuce/issues
 Encoding: UTF-8
 VignetteBuilder: knitr

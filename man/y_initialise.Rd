@@ -12,23 +12,34 @@ y_initialize(..., hub.url = "localhost:4444")
 \arguments{
 \item{...}{character Names of the yoctopuce APIs to import.}
 
-\item{hub.url}{character URL including port of the hub to connect to,
-defaults to a virtual hub running locally, but hardware and virtual
-hub can be accessed through a LAN or the internet.}
+\item{hub.url}{character vector of URLs to YoctoHubs, including the port on
+the hub to connect to, defaults to a virtual hub running locally, but
+hardware and virtual hubs can be accessed through a LAN or the internet.
+Passing `NULL` or `character()` skips hub registration.}
 }
 \description{
 Import the API and module-specific extensions and register to communicate
 through a virtual or physical hub.
 }
 \details{
-With this function we initialize the API and register to use a specific
-hub. The main API can be accessed through object \code{yocto_api} using
-the \code{$} notation. Be aware that there is more than one level of
-nesting. Say for 'yoctopuce.yocto_relay' the object \code{yocto_relay} is
-created and can be used to access its members.
+With this function we initialize the API and register to use a specific hub.
+The main API can be accessed through object \code{yocto_api} using the
+\code{$} notation, and specific APIs using objects named after the APIs.
+Beware that there is more than one level of nesting, so more than one `$` can
+be needed. For example, for Python module 'yoctopuce.yocto_relay' the object
+\code{yocto_relay} is created and can be used to access its members.
 
 This function uses the Python API to check that the requested API extensions
 are available, so it should work unchanged with future updates to the
 YoctoPuce Python library, including after new modules are released as long
-as the Python libray installed is up-to-date.
+as the Python library installed is up-to-date.
 }
+\section{Warning!}{
+
+Although the objects created to access Python library modules can persist
+from one R session to a later one, their link to the Python library is not
+restored. This, function `y_initialise` has to be run at the start of a new
+R session, and Python modules reimported. In general it is recommended not
+to import the same Python modules more than once on a given session.
+}
+

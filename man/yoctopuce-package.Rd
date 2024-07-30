@@ -20,8 +20,8 @@ with the library and also available on-line at
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://www.r4photobiology.info}
   \item \url{https://github.com/aphalo/yoctopuce}
+  \item \url{https://docs.r4photobiology.info/yoctopuce}
   \item Report bugs at \url{https://github.com/aphalo/yoctopuce/issues}
 }
 

@@ -1,5 +1,6 @@
 ---
 title: "Use Examples"
+subtitle: "1. Actuator and control modules"
 ---
 
 ```{r, include = FALSE}
@@ -9,6 +10,143 @@ knitr::opts_chunk$set(
 )
 ```
 
+## Purpose
+
+YoctoPuce produces isolated USB modules and special hubs suitable for diverse automation tasks, including data acquisition and logging and various actuators suitable for control. YoctoPuce supplies libraries for several computing languages but not for R. Using the _yoctopuce_ Python library from R is rather easy thanks to package ['reticulate'](https://rstudio.github.io/reticulate/). R package 'yoctopuce' makes the using YoctoPuce modules easier for R users unfamiliar with package 'reticulate' and/or Python. Package 'yoctopuce' also includes an article (published only as part of the online documentation) with use case examples for various YoctoPuce USB modules.
+
+## Using Yocto-Relay and Yocto-PowerRelay modules
+
+For these examples I set the function names through the webapp before running the code. These names are persistent over power cycling of the modules. I also used a local virtual hub (`localhost:4444`), which is the default. 
+
+If using a virtual hub instead of a hardware one, the [VirtualHub software](https://www.yoctopuce.com/EN/virtualhub.php) should be installed and running on the computer or microcontroller board where the USB modules are plugged in.
+
 ```{r setup}
 library(yoctopuce)
 ```
+
+Python and the Python 'yoctopuce' library have to be installed on the computer where the R code will run. The library is installed in a separate Python environment `r-yoctopuce', that is used only by R package 'yoctopuce'. This is to avoid interfering with other uses of Python. Installation, of course, needs to be done only once.
+
+```{r install, eval=FALSE}
+install_python()
+install_yoctopuce()
+```
+
+On each R session where communication with yoctopuce modules is needed, the library needs to be imported and registered. Based on the module being targeted we import functions to make them available in R and register the hub (virtual or hardware) that will be used to connect to the modules. The example below assumes we will use a **Yocto-Relay** and a **Yocto-PowerRelay-V2** module plugged into local USB ports and accessed through a running local instance of the virtual hub.
+
+See the [library documentation](https://www.yoctopuce.com/EN/doc/reference/yoctolib-php-EN.html) for details. Be aware that the imports are done by Python library module name, not by YoctoPuce hardware module name. For both the **Yocto-Relay** and **Yocto-PowerRelay-V2** modules the import needed is the same `yocto_relay`.
+
+```{r initialise-relay}
+y_initialise("yocto_relay")
+ls(pattern = "^yocto")
+```
+This creates R objects `yocto_api`, `yocto_humidity`, `yocto_temperature`, `yocto_pressure` giving access to the functions and objects from the Python library using `$` notation. However, one needs first to find the module one intends to use and create a wrapper object. The serial number plus "function" within the module or an user-assigned name of the module "function", is used to locate it. Here we use `"RELAY1"`, the default name of the first of two relays ("functions") in the **Yocto-Relay** module. When using default names, only one module of a given type can be used. With multiple identical modules, either names should be changed to unique ones, or serial numbers used.
+
+```{r exercise-relay}
+Relay1 <- yocto_relay$YRelay$FindRelay("RELAY1")
+# in case of failure the Python error message is displayed
+
+# we can check the serial number of the found relay
+Relay1$describe()
+Relay1$get_functionId()
+
+# We can then, for example, flip the relay switch to ON ("B") state for 200 ms
+Relay1$pulse(200)
+# Or with a delay or 1000 ms
+Relay1$delayedPulse(1000, 200)
+# Or flip it on
+Relay1$set_state(Relay1$STATE_B)
+# Or flip it off
+Relay1$set_state(Relay1$STATE_A)
+# Or toggle the current state
+Relay1$toggle()
+```
+
+Passing `"RELAY2"` instead of `"RELAY1"` to `FindRelay()` would give access to the second relay in the module.
+
+In a real application, you would most likely want to rename the "RELAY1" function in the module as well as using a different name than `Relay1` for the R object.
+
+The code for a **Yocto-PowerRelay-V2** is identical, except for the function name that I set to `"RELAY3"` and that we need only to change in the the call to `FindRelay()`.
+
+```{r exercise-power-relay}
+Relay3 <- yocto_relay$YRelay$FindRelay("RELAY3")
+# in case of failure the Python error message is displayed
+
+# we can check the serial number of the found relay module
+PowerRelay.module <- Relay3$get_module()
+PowerRelay.module$get_hardwareId()
+PowerRelay.module$get_firmwareRelease()
+# other information
+Relay3$describe()
+Relay3$get_functionId()
+Relay3$get_friendlyName()
+Relay3$get_logicalName()
+# settings
+Relay3$get_maxTimeOnStateB()
+Relay3$get_output()
+# change state
+# flip the relay switch to ON ("B") state for 200 ms
+Relay3$pulse(200)
+# flip the relay switch to ON ("B") state for 200 ms after a delay of 1000 ms
+Relay3$delayedPulse(1000, 200)
+# Or flip it on
+Relay3$set_state(Relay1$STATE_B)
+# Or flip it off
+Relay3$set_state(Relay1$STATE_A)
+# Or toggle the current state
+Relay3$toggle()
+```
+
+I do not have **Yocto-PowerRelay-V3** or **Yocto-MaxiPowerRelay** to play with, but they should work exactly in the same way.
+
+## Using the Yocto-PWM-Tx module
+
+As above we start by importing the necessary Python modules.
+
+```{r initialise-PWM}
+y_initialise("yocto_pwmoutput", "yocto_pwmpowersource")
+ls(pattern = "^yocto")
+```
+
+The functions are not the same as for relays, but the naming convention is. The **Yocto-PWM-Tx** module exposes three functions, two PWM channels and an interface for power-supply settings shared by two channels. We search for one of the PWM channels and the power function, once again using logical names previously stored in the module. Serial numbers could have been also used here.
+
+Once the wrappers are attached to the module functions, we can retrieve settings and constants and modify settings.
+
+```{r}
+PWM1 <- yocto_pwmoutput$YPwmOutput$FindPwmOutput("out1")
+PWM1.power.source <- yocto_pwmpowersource$YPwmPowerSource$FindPwmPowerSource("PWM01-power")
+# in case of failure the Python error message is displayed
+
+# we can check the serial number of the found relay module
+PWM1.module <- PWM1$get_module()
+PWM1.module$get_hardwareId()
+PWM1.module$get_firmwareRelease()
+# other information
+PWM1$describe()
+PWM1$get_functionId()
+PWM1$get_friendlyName()
+PWM1$get_logicalName()
+# settings
+PWM1$get_period()
+PWM1$get_dutyCycle()
+PWM1$get_frequency()
+PWM1$get_pwmTransition()
+PWM1$get_pulseDuration()
+PWM1.power.source$get_powerMode()
+
+# Disable output
+PWM1$set_enabled(PWM1$ENABLED_FALSE)
+# change settings
+PWM1.power.source$set_powerMode(PWM1.power.source$POWERMODE_USB_5V)
+PWM1$set_dutyCycle(20) # as %
+PWM1$set_frequency(5) # Hz
+# enable output
+PWM1$set_enabled(PWM1$ENABLED_TRUE)
+
+# names in CAPITAL are constants, and help make the code readable
+print(PWM1.power.source$POWERMODE_USB_5V)
+print(PWM1.power.source$POWERMODE_USB_3V)
+```
+
+## YoctoPuce documentation
+
+The [YoctoPuce website](https://www.yoctopuce.com/) provides many code examples in module manuals, tutorials and in blog posts. The libraries for different computer languages use consistent naming and design and code examples not using the Python version of the library and easy to translate.
