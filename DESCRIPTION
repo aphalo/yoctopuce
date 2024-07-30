@@ -1,0 +1,25 @@
+Package: yoctopuce
+Type: Package
+Title: YoctoPuce USB modules
+Version: 0.1.0
+Date: 2024-07-30
+Authors@R:
+    c(
+    person("Pedro J.", "Aphalo", email = "pedro.aphalo@helsinki.fi", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3385-972X"))    )
+Maintainer: Pedro J. Aphalo <pedro.aphalo@helsinki.fi>
+Description: Bridge between R and the yoctopuce Python library, making it possible
+    to control and adquire data from YoctoPuce USB interface modules.
+License: GPL (>= 2)
+LazyLoad: TRUE
+ByteCompile: TRUE
+Depends:
+    R (>= 4.0.0),
+    reticulate (>= 1.38.0)
+Suggests:
+    knitr (>= 1.24),
+    rmarkdown (>= 1.14)
+URL: https://www.r4photobiology.info, https://github.com/aphalo/yoctopuce
+BugReports: https://github.com/aphalo/yoctopuce/issues
+Encoding: UTF-8
+VignetteBuilder: knitr
+RoxygenNote: 7.3.2
