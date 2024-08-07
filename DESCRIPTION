@@ -1,8 +1,8 @@
 Package: yoctopuce
 Type: Package
 Title: YoctoPuce USB modules
-Version: 0.1.0
-Date: 2024-07-30
+Version: 0.1.0-1
+Date: 2024-08-07
 Authors@R:
     c(
     person("Pedro J.", "Aphalo", email = "pedro.aphalo@helsinki.fi", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3385-972X"))    )
