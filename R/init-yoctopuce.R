@@ -1,13 +1,17 @@
 #' Initialise the API
 #'
-#' Import the API and module-specific extensions and register to communicate
-#' through a virtual or physical hub.
+#' Import the API and USB-module-specific functions and register to communicate
+#' with USB modules through a virtual or physical hub.
 #'
-#' @param ... character Names of the yoctopuce APIs to import.
+#' @param ... character Names of the yoctopuce Python modules to import from
+#'   the 'yoctopuce' Python library supporting the functions in the USB modules
+#'   that will be used.
 #' @param hub.url character vector of URLs to YoctoHubs, including the port on
 #'   the hub to connect to, defaults to a virtual hub running locally, but
 #'   hardware and virtual hubs can be accessed through a LAN or the internet.
 #'   Passing `NULL` or `character()` skips hub registration.
+#' @param force logical Force registration even if the same URL has been already
+#'    registered.
 #'
 #' @details
 #' With this function we initialize the API and register to use a specific hub.
@@ -31,7 +35,8 @@
 #'
 #' @export
 #'
-y_initialise <- function(..., hub.url = "localhost:4444") {
+init_yoctopuce <- function(..., hub.url = "localhost:4444", force = FALSE) {
+
   modules <- list(...)
   for (i in seq_along(modules)) {
     if (!grepl("^yoctopuce\\.", modules[[i]])) {
@@ -43,35 +48,57 @@ y_initialise <- function(..., hub.url = "localhost:4444") {
   # set union, in addition, removes any duplicates
   modules <- union("yoctopuce.yocto_api", modules)
 
+  message("Importing Python modules into R objects:")
   for (module in modules) {
     short.name <- gsub("^yoctopuce\\.", "", module)
     if (py_module_available(module)) {
-      message("Importing: ", module)
-      assign(short.name, import(module), inherits = TRUE)
+      if (!exists(short.name) || !length(get(short.name))) {
+        message("Module '", module, "' imported as '", short.name, "'")
+        assign(short.name, import(module), inherits = TRUE)
+      } else {
+        message("Existing object '", short.name, "' not replaced.")
+      }
     } else {
-      warning("Python module '", module, "' not found!")
+      warning("Module '", module, "' not found!")
     }
   }
 
   if (length(hub.url)) {
+    register_hubs(hub.url = hub.url, force = force)
+  }
+  invisible(registered.hubs)
+}
+
+#' @rdname init_yoctopuce
+#'
+y_initialize <- init_yoctopuce
+
+#' @rdname init_yoctopuce
+#'
+y_initialise <- init_yoctopuce
+
+#' @rdname init_yoctopuce
+#'
+#' @export
+#'
+register_hubs <- function(hub.url = "localhost:4444", force = FALSE) {
+  if (length(hub.url)) {
     # protects in case registered_hubs object is deleted by user
-    if (!exists("registered_hubs", inherits = TRUE, mode = "character")) {
-      assign("registered_hubs", character(), inherits = TRUE)
+    if (!exists("registered.hubs", inherits = TRUE, mode = "character")) {
+      assign("registered.hubs", character(), inherits = TRUE)
     }
     for (hub in hub.url) {
-      errmsg <- yocto_api$YRefParam()
-      if (yocto_api$YAPI$RegisterHub(hub, errmsg) != yocto_api$YAPI$SUCCESS) {
-        stop("Init error on ", hub, ": ", errmsg$value)
+      if (!force || hub %in% registered.hubs) {
+        errmsg <- yocto_api$YRefParam()
+        if (yocto_api$YAPI$RegisterHub(hub, errmsg) != yocto_api$YAPI$SUCCESS) {
+          stop("Init error on ", hub, ": ", errmsg$value)
+        }
+        assign("registered.hubs", union(registered.hubs, hub), inherits = TRUE)
       }
-      registered_hubs <- union(registered_hubs, hub)
     }
   }
 
-  invisible(registered_hubs)
+  invisible(registered.hubs)
 }
-
-#' @rdname y_initialise
-#'
-y_initialize <- y_initialise
 
 utils::globalVariables("yocto_api")

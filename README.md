@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 
-[![gginnards status
+[![yoctopuce status
 badge](https://aphalo.r-universe.dev/badges/yoctopuce)](https://aphalo.r-universe.dev/yoctopuce)
 [![web
 site](https://img.shields.io/badge/documentation-yoctopuce-informational.svg)](https://docs.r4photobiology.info/yoctopuce/)
@@ -81,7 +81,7 @@ two relays (“functions”) in our YoctoRelay module. When using default
 names, only one module of a given type can be used. With multiple
 identical modules, either names should be changed to unique ones, or
 serial numbers used. Using default names makes the code usable unchanged
-with any YoctoPuce module of a given type, while using different names
+with any Yoctopuce module of a given type, while using different names
 or serial numbers makes it possible to individually access multiple
 modules of the same type through the same hub.
 
@@ -97,9 +97,9 @@ Relay1$get_functionId()
 Relay1$pulse(200)
 ```
 
-## YoctoPuce documentation
+## Yoctopuce documentation
 
-The [YoctoPuce website](https://www.yoctopuce.com/) provides many code
+The [Yoctopuce website](https://www.yoctopuce.com/) provides many code
 examples in module manuals, tutorials and in blog posts. The libraries
 for different computer languages use consistent naming and design and
 code examples using versions of the ‘yoctopuce’ other than the Python
@@ -108,8 +108,8 @@ functions `y_initialise()` and `install_yoctopuce()` you will be using
 the functions from the Python library calling them through the “bridge”
 provided. As no wrapper R functions are used, at least in principle, R
 package ‘yoctopuce’ should give always access to all the functions
-available in the installed version of the yocotpuce Python library, even
-in the future.
+available in the installed version of the ‘yoctopuce’ Python library,
+even in the future.
 
 ## Package ‘reticulate’
 
@@ -122,9 +122,9 @@ Thus, when package ‘yoctopuce’ is loaded and attached, package
 ## Installation
 
 To use this package you will need to have at least one USB module from
-Yoctopuce. To access the module you will need an active Yocto hub. This
+Yoctopuce. To access the module you will need an active YoctoHub. This
 can be a virtual (software hosted in the local or another computer) or a
-hardware Yocto Hub from Yoctopuce. Virtual hubs must be running, either
+hardware YoctoHub from Yoctopuce. Virtual hubs must be running, either
 started manually or automatically at computer start-up. The virtual hub
 can be installed as a background process or run as a regular
 application. In some infrequent cases access to the local USB ports from
@@ -133,7 +133,7 @@ using R package ‘yoctopuce’. In such cases running the virtual hub as a
 background process can sometimes help.
 
 Installation of the current unstable version from a CRAN-like repository
-at R-Universe (Binaries for Mac, Win, Webassembly, and Linux, as well as
+at R-Universe (Binaries for Mac, Win, WebAssembly, and Linux, as well as
 sources available) is possible by explicitly listing the repository (as
 shown) or by adding the `https://aphalo.r-universe.dev` repository to
 the repositories known to R:
@@ -178,7 +178,7 @@ citation("yoctopuce")
 #> To cite package 'yoctopuce' in publications use:
 #> 
 #>   Aphalo P (2024). _yoctopuce: YoctoPuce USB modules_. R package
-#>   version 0.1.0-1, https://docs.r4photobiology.info/yoctopuce,
+#>   version 0.1.1, https://docs.r4photobiology.info/yoctopuce,
 #>   <https://github.com/aphalo/yoctopuce>.
 #> 
 #> A BibTeX entry for LaTeX users is
@@ -187,7 +187,7 @@ citation("yoctopuce")
 #>     title = {yoctopuce: YoctoPuce USB modules},
 #>     author = {Pedro J. Aphalo},
 #>     year = {2024},
-#>     note = {R package version 0.1.0-1, https://docs.r4photobiology.info/yoctopuce},
+#>     note = {R package version 0.1.1, https://docs.r4photobiology.info/yoctopuce},
 #>     url = {https://github.com/aphalo/yoctopuce},
 #>   }
 ```

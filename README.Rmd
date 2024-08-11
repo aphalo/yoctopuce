@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # yoctopuce
 
 <!-- badges: start -->
-[![gginnards status badge](https://aphalo.r-universe.dev/badges/yoctopuce)](https://aphalo.r-universe.dev/yoctopuce)
+[![yoctopuce status badge](https://aphalo.r-universe.dev/badges/yoctopuce)](https://aphalo.r-universe.dev/yoctopuce)
 [![web site](https://img.shields.io/badge/documentation-yoctopuce-informational.svg)](https://docs.r4photobiology.info/yoctopuce/)
 <!-- badges: end -->
 
@@ -47,7 +47,7 @@ y_initialise("yocto_relay", "yocto_humidity", "yocto_temperature", "yocto_pressu
 ls(pattern = "^yocto")
 ```
 
-The first line of code above creates R objects `yocto_api`, `yocto_humidity`, `yocto_temperature`, `yocto_pressure` giving access to the functions and objects from the Python library using `$` notation. However, one needs first to find the module one intends to use and create a wrapper object. The serial number plus "function" name within the module or an user-assigned "logical" name of the module "function", is used to locate it. Here we use `"RELAY1"`, the name of the first of two relays ("functions") in our YoctoRelay module. When using default names, only one module of a given type can be used. With multiple identical modules, either names should be changed to unique ones, or serial numbers used. Using default names makes the code usable unchanged with any YoctoPuce module of a given type, while using different names or serial numbers makes it possible to individually access multiple modules of the same type through the same hub.
+The first line of code above creates R objects `yocto_api`, `yocto_humidity`, `yocto_temperature`, `yocto_pressure` giving access to the functions and objects from the Python library using `$` notation. However, one needs first to find the module one intends to use and create a wrapper object. The serial number plus "function" name within the module or an user-assigned "logical" name of the module "function", is used to locate it. Here we use `"RELAY1"`, the name of the first of two relays ("functions") in our YoctoRelay module. When using default names, only one module of a given type can be used. With multiple identical modules, either names should be changed to unique ones, or serial numbers used. Using default names makes the code usable unchanged with any Yoctopuce module of a given type, while using different names or serial numbers makes it possible to individually access multiple modules of the same type through the same hub.
 
 ```{r, eval=FALSE}
 Relay1 <- yocto_relay$YRelay$FindRelay("RELAY1")
@@ -61,9 +61,9 @@ Relay1$get_functionId()
 Relay1$pulse(200)
 ```
 
-## YoctoPuce documentation
+## Yoctopuce documentation
 
-The [YoctoPuce website](https://www.yoctopuce.com/) provides many code examples in module manuals, tutorials and in blog posts. The libraries for different computer languages use consistent naming and design and code examples using versions of the 'yoctopuce' other than the Python one are easy to translate into the Python equivalent. Except for functions `y_initialise()` and `install_yoctopuce()` you will be using the functions from the Python library calling them through the "bridge" provided. As no wrapper R functions are used, at least in principle, R package 'yoctopuce' should give always access to all the functions available in the installed version of the yocotpuce Python library, even in the future.
+The [Yoctopuce website](https://www.yoctopuce.com/) provides many code examples in module manuals, tutorials and in blog posts. The libraries for different computer languages use consistent naming and design and code examples using versions of the 'yoctopuce' other than the Python one are easy to translate into the Python equivalent. Except for functions `y_initialise()` and `install_yoctopuce()` you will be using the functions from the Python library calling them through the "bridge" provided. As no wrapper R functions are used, at least in principle, R package 'yoctopuce' should give always access to all the functions available in the installed version of the 'yoctopuce' Python library, even in the future.
 
 ## Package 'reticulate'
 
@@ -71,9 +71,9 @@ Currently, package 'reticulate' is imported in whole and re-exported. Thus, when
 
 ## Installation
 
-To use this package you will need to have at least one USB module from Yoctopuce. To access the module you will need an active Yocto hub. This can be a virtual (software hosted in the local or another computer) or a hardware Yocto Hub from Yoctopuce. Virtual hubs must be running, either started manually or automatically at computer start-up. The virtual hub can be installed as a background process or run as a regular application. In some infrequent cases access to the local USB ports from within the same R using other drivers can interfere with the access using R package 'yoctopuce'. In such cases running the virtual hub as a background process can sometimes help.
+To use this package you will need to have at least one USB module from Yoctopuce. To access the module you will need an active YoctoHub. This can be a virtual (software hosted in the local or another computer) or a hardware YoctoHub from Yoctopuce. Virtual hubs must be running, either started manually or automatically at computer start-up. The virtual hub can be installed as a background process or run as a regular application. In some infrequent cases access to the local USB ports from within the same R using other drivers can interfere with the access using R package 'yoctopuce'. In such cases running the virtual hub as a background process can sometimes help.
 
-Installation of the current unstable version from a CRAN-like repository at R-Universe (Binaries for Mac, Win, Webassembly, and Linux, as well as sources available) is possible by explicitly listing the repository (as shown) or by adding the `https://aphalo.r-universe.dev` repository to the repositories known to R:
+Installation of the current unstable version from a CRAN-like repository at R-Universe (Binaries for Mac, Win, WebAssembly, and Linux, as well as sources available) is possible by explicitly listing the repository (as shown) or by adding the `https://aphalo.r-universe.dev` repository to the repositories known to R:
 
 ```{r universe-installation, eval=FALSE}
 install.packages('yoctopuce', 

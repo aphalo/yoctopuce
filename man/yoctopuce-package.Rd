@@ -6,7 +6,7 @@
 \alias{yoctopuce-package}
 \title{yoctopuce: YoctoPuce USB modules}
 \description{
-Bridge between R and the yoctopuce Python library, making it possible to control and adquire data from YoctoPuce USB interface modules.
+Bridge between R and the yoctopuce Python library, making it possible to control and acquire data from YoctoPuce USB interface modules.
 }
 \details{
 Package 'yoctopuce' provides wrapper functions that call functions

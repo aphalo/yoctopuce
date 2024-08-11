@@ -4,4 +4,5 @@
 ^_pkgdown\.yml$
 ^\.\./docs/yoctopuce$
 ^pkgdown$
+^inst-not$
 README.Rmd
