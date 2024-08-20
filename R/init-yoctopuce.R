@@ -14,7 +14,7 @@
 #'    registered.
 #'
 #' @details
-#' With this function we initialize the API and register to use a specific hub.
+#' This function is used to initialize the API and register to use one or more hubs.
 #' The main API can be accessed through object \code{yocto_api} using the
 #' \code{$} notation, and specific APIs using objects named after the APIs.
 #' Beware that there is more than one level of nesting, so more than one `$` can
@@ -28,10 +28,13 @@
 #'
 #' @section Warning!:
 #' Although the objects created to access Python library modules can persist
-#' from one R session to a later one, their link to the Python library is not
-#' restored. This, function `y_initialise` has to be run at the start of a new
-#' R session, and Python modules reimported. In general it is recommended not
-#' to import the same Python modules more than once on a given session.
+#' from one R session to a later one, their link to the Python library is
+#' neither persistent nor restored. Thus, function `init_yoctopuce()` has to be
+#' run at the start of each new R session, and Python modules reimported, even
+#' if the objects have been saved. In general it is recommended not to import
+#' the same Python modules more than once on a given session, although in
+#' practice this does not seem to cause difficulties with the 'yoctopuce' Python
+#' library.
 #'
 #' @export
 #'
@@ -68,14 +71,6 @@ init_yoctopuce <- function(..., hub.url = "localhost:4444", force = FALSE) {
   }
   invisible(registered.hubs)
 }
-
-#' @rdname init_yoctopuce
-#'
-y_initialize <- init_yoctopuce
-
-#' @rdname init_yoctopuce
-#'
-y_initialise <- init_yoctopuce
 
 #' @rdname init_yoctopuce
 #'
