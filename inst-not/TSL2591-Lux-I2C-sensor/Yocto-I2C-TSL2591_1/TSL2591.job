@@ -1,0 +1,78 @@
+{
+  "Init": {
+    "interval": 0,
+    "script": [
+      {"assert": "! isset($state)"},
+      {"writeLine": "{S}52A003{P}"},
+      {"expect": "29:{A}{A}{A}"},
+      {"writeLine": "{S}52A1{P}{S}53xx{N}{P}"},
+      {"expect": "29:{A}{A} 29:{A}($gain:BYTE)"},
+      {"compute": "$gain=($gain>>4)&3"},
+      {"compute": "$state=1"},
+      {"log": "Init Done"}
+    ]
+  },
+  "read": {
+    "interval": 100,
+    "script": [
+      {"assert": "isset($state)"},
+      {"assert": "$state=1"},
+      {"writeLine": " {S}52B4{P}{S}53xx{A}xx{N}{P}"},
+      {"expect": "29:{A}{A} 29:{A}($CH0:WORDL)"},
+      {"compute": "$1 = ($gain==0 ? $CH0*9.876 : ($gain==1 ? $CH0 *0.428 : ($gain==2 ? $CH0 * 0.025 : $CH0*0.001 )))"},
+      {"compute": "$state = ( $CH0<50 && $gain<3 ? 2 + $gain +1 : $state)"},
+      {"compute": "$state = ( $CH0>37000 && $gain>0 ?  2+$gain-1 : $state)"}
+    ]
+  },
+  "setGainTo0": {
+    "interval": 100,
+    "script": [
+      {"assert": "isset($state)"},
+      {"assert": "$state==2"},
+      {"writeLine": "{S}52A100{P}"},
+      {"expect": "29:{A}{A}{A}"},
+      {"compute": "$gain=0"},
+      {"log": "gain set to 0"},
+      {"wait": 200},
+      {"compute": "$state=1"}
+    ]
+  },
+  "setGainTo1": {
+    "interval": 100,
+    "script": [
+      {"assert": "isset($state)"},
+      {"assert": "$state==3"},
+      {"writeLine": "{S}52A110{P}"},
+      {"expect": "29:{A}{A}{A}"},
+      {"compute": "$gain=1"},
+      {"log": "gain set to 1"},
+      {"wait": 200},
+      {"compute": "$state=1"}
+    ]
+  },
+  "setGainTo2": {
+    "interval": 100,
+    "script": [
+      {"assert": "isset($state)"},
+      {"assert": "$state==4"},
+      {"writeLine": "{S}52A120{P}"},
+      {"expect": "29:{A}{A}{A}"},
+      {"compute": "$gain=2"},
+      {"log": "get set to 2"},
+      {"wait": 200},
+      {"compute": "$state=1"}
+    ]
+  },
+  "setGainTo3": {
+    "interval": 100,
+    "script": [
+      {"assert": "isset($state)"},
+      {"assert": "$state==5"},
+      {"writeLine": "{S}52A130{P}"},
+      {"compute": "$gain=3"},
+      {"log": "gain set  to 3"},
+      {"wait": 200},
+      {"compute": "$state=1"}
+    ]
+  }
+}
