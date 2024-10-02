@@ -1,0 +1,202 @@
+---
+title: "TSL2591 I2C lux sensor"
+author: "Pedro J. Aphalo"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+This is a demonstration of how to use the TSL2591 I2C light sensor connected to
+a Yosto-I2C module directly from R. We use an edited version of the _job_ file
+provided by Yoctopuce in the article [Yocto-I2C and
+TSL2591](https://www.yoctopuce.com/EN/article/yocto-i2c-and-tsl2591).
+
+The original job code used an integration time of 100 ms, while in the editted
+job we use 500 ms. The intrgration time and gain are set together with the
+same command. The last digit sets the integration time, while the second last
+sets the gain. I changed `{"writeLine": "{S}52A100{P}"}` into 
+`{"writeLine": "{S}52A104{P}"}`. and simlarly for the other gain settings.
+
+The original job code read only channel 0 (CH0) of the TSL2591, the editted
+script reads also channel 1 (CH1) of TSL2591. CHO is sensitive to VIS + IR
+radiation, while CH1 is sensitive only to IR. To obtain a reading of
+illuminance valid under different light sources, the readings from CH1 are
+used to correct for the IR sensirtivity of CH0.
+
+The original job code stored the scaled counts from CH1 in GenericSensor1
+directly. The editted code saves scaled counts for CHO and CH1 in variables,
+and then sets GenericSensor1 and GenericSensor2 with them. The corrected
+"light" value is calculated from the two variables and assigned to 
+GenericSensor3.
+
+We will use two R packages unrelated to the interaction with the USB module.
+
+```{r}
+library(readr)
+library(ggplot2)
+```
+
+We use R package 'yoctopuce' to get access to the Python version of of the
+[Yoctopuce library](https://www.yoctopuce.com/EN/libraries.php) initializing 
+the modules from the library that we will use.
+
+```{r}
+library(yoctopuce)
+
+init_yoctopuce("yocto_api", 
+               "yocto_i2cport", 
+               "yocto_files", 
+               "yocto_genericsensor")
+```
+We upload the text file `TSL2591-2ch.job` with the code for the job to be run in the 
+Yocto-I2C module. The file will be included in the R package 'yocotopuce'.
+However, here I use a local copy previously downloaded to my computer.
+
+The call to `gsub()` fixes the file end-of-line encoding in case it follows
+Windows conventions instead of UNIX/Linux ones. It also seems necessary in other
+cases as it forces the conversion from a Python object into an R `character`
+vector.
+
+```{r}
+job_text <- read_file("./Yocto-I2C-TSL2591_1/TSL2591-2ch.job") |>
+  gsub("\\r\\n", "\n", x = _)
+
+file_system <- yocto_files$YFiles$FindFiles("YI2CMK01-1214E2.files")
+
+file_system$isOnline()
+file_system$upload("TSL2591.job", job_text)
+```
+
+To see the job file's text we can use `cat()` as it decodes the embedded
+character scapes.
+
+```{r}
+cat(job_text)
+```
+
+The Yocot-I2C module plays the role of I2C master
+and the TSL2591 breakout board the role of an I2C slave. 
+We set I2C-communication related parameters in the  module.
+
+```{r}
+I2C <- yocto_i2cport$YI2cPort$FindI2cPort("YI2CMK01-1214E2")
+if (is.null(I2C)) {
+  stop('No module connected (check cable)')
+}
+
+I2C$isOnline()
+I2C$describe()
+
+# settings
+I2C$set_i2cMode("100kbps,2000ms,NoRestart")
+I2C$set_i2cVoltageLevel(I2C$I2CVOLTAGELEVEL_3V3)
+I2C$set_protocol("Line")
+# I2C$saveToFlash() # making settings permanent, run only if needed!
+
+# checks
+I2C$get_i2cMode()
+I2C$get_i2cVoltageLevel()
+I2C$get_protocol()
+```
+Activate the job and set it to run on module at start up.
+
+```{r}
+I2C$get_currentJob()
+I2C$selectJob("TSL2591.job")
+I2C$set_startupJob("TSL2591.job")
+I2C$get_currentJob()
+I2C$get_startupJob()
+```
+
+We use three of the 10 generic sensors in the Yocto_I2C module, 
+`genericSensor1` as set in the script.
+
+```{r}
+VIS.sensor <- yocto_genericsensor$YGenericSensor$FindGenericSensor("YI2CMK01-1214E2.genericSensor1")
+if (is.null(VIS.sensor)) {
+  stop('No module connected (check cable)')
+}
+IR.sensor <- yocto_genericsensor$YGenericSensor$FindGenericSensor("YI2CMK01-1214E2.genericSensor2")
+Illum.sensor <- yocto_genericsensor$YGenericSensor$FindGenericSensor("YI2CMK01-1214E2.genericSensor3")
+
+VIS.sensor$describe()
+IR.sensor$describe()
+Illum.sensor$describe()
+
+Illum.sensor$get_resolution()
+Illum.sensor$get_valueRange()
+
+Illum.sensor$get_advertisedValue()
+Illum.sensor$get_highestValue()
+Illum.sensor$get_lowestValue()
+Illum.sensor$get_currentRawValue()
+```
+
+Each generic or specific sensor has a data logger function. Here we access
+the datalogger. We start by making sure that it is enabled and the memory
+free of old data.
+
+```{r}
+Illum.logger <- Illum.sensor$get_dataLogger()
+Illum.logger$describe()
+#illum.logger$set_clearHistory()
+Illum.logger$set_autoStart(illum.logger$AUTOSTART_ON)
+Illum.logger$set_recording(illum.logger$RECORDING_ON)
+# I2C$saveToFlash() # making settings permanent, run only if needed!
+
+as.POSIXct(Illum.logger$get_timeUTC(), origin = "1970-01-01")
+Illum.logger$get_usage() # as % of logger memory
+```
+```{r}
+# Enumerate all connected sensors
+sensor <- Illum.sensor$FirstSensor()
+
+Illum.dataset <- yocto_api$YConsolidatedDataSet(0, 0, sensor)
+# record <- list()
+# Illum.dataset$nextRecord(record)
+```
+
+```{r, eval=FALSE}
+# does not work
+py_run_string("
+# Enumerate all connected sensors
+sensorList = []
+sensor = YSensor.FirstSensor()
+while sensor is not None:
+    sensorList.append(sensor)
+    sensor = sensor.nextSensor()
+
+# Generate consolidated CSV output for all sensors
+data = YConsolidatedDataSet(0, 0, sensorList)
+record = []
+while data.nextRecord(record):
+    line = datetime.datetime.fromtimestamp(record[0]).isoformat()
+    for idx in range(1, len(record)):
+        line += \";%.3f\" % record[idx]
+    print(line)")
+```
+
+
+```{r}
+data3 <- read_delim("inst-not/TSL2591-Lux-I2C-sensor/data-2ch-3log.csv", 
+                    delim = ";", escape_double = FALSE, trim_ws = TRUE,
+                    col_select = 2:5)
+colnames(data3) <- c("time", "VIS", "IR", "Illum")
+data3 <- subset(data3, time > ymd_hm("2024-09-29 15:00"))
+```
+
+```{r}
+ggplot(data3) + 
+  geom_line(aes(time, VIS)) +
+  geom_line(aes(time, IR), colour = "red") +
+  expand_limits(y = 0)
+  
+ggplot(data3, aes(time, Illum)) + 
+  geom_line() +
+  expand_limits(y = 0)
+
+ggplot(data3, aes(time, VIS-IR)) + 
+  geom_line() +
+  expand_limits(y = 0)
+```
+
+

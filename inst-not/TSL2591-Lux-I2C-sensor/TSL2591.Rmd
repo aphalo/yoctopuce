@@ -126,9 +126,10 @@ illum.logger$get_usage() # as % of logger memory
 ```{r}
 # Enumerate all connected sensors
 sensor <- illum.sensor$FirstSensor()
+
 illum.dataset <- yocto_api$YConsolidatedDataSet(0, 0, sensor)
-record <- list()
-illum.dataset$nextRecord(record)
+# record <- list()
+# illum.dataset$nextRecord(record)
 ```
 
 ```{r}
